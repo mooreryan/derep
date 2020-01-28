@@ -6,7 +6,8 @@
             [clj-wrap-indent.core :as wrap]
             [mooreryan.derep.coords :as coords]
             [mooreryan.derep.gui :as gui]
-            [mooreryan.derep.const :as const]))
+            [mooreryan.derep.const :as const]
+            [mooreryan.derep.pipeline :as pipeline]))
 
 (defn eprintln
   [& more]
@@ -51,9 +52,9 @@
     :default 80.0
     :parse-fn #(Double/parseDouble %)
     :validate [validate-percentage "Must be between 0 and 100"]]
-   ["-i" "--coords-fname NAME" "Input coords file name"
+   ["-i" "--in-file NAME" "Input coords file name"
     :validate [file-exists? "input file doesn't exist!"]]
-   ["-o" "--out-fname NAME" "Output file name"]
+   ["-o" "--out-dir NAME" "Output directory name"]
    ["-h" "--help"]])
 
 (defn version-banner
@@ -128,18 +129,18 @@
       {:exit-message (cli-banner summary) :ok? true}
       errors
       {:exit-message (error-msg errors)}
-      (missing? :coords-fname options)
+      (missing? :in-file options)
       {:exit-message (str (style "ERROR:" :bright)
-                          "  --coords-fname is required!"
+                          "  --in-file is required!"
                           "\n"
                           (cli-banner summary))}
-      (missing? :out-fname options)
+      (missing? :out-dir options)
       {:exit-message (str (style "ERROR:" :bright)
-                          "  --out-fname is required!"
+                          "  --out-dir is required!"
                           "\n"
                           (cli-banner summary))}
       :else
-      {:action coords/parse-coords :options options})))
+      {:action pipeline/run-derep-pipeline :options options})))
 
 (defn run-derep-cli
   "Run the CLI program."

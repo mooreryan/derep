@@ -1,6 +1,8 @@
 (ns mooreryan.derep.coords
   (:require [clojure.string :as s]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [me.raynes.fs :as fs])
+  (:import (java.io File)))
 
 ;; This should be the fourth line of the coords file if it was made properly.
 (def coords-header-line "[S1]\t[E1]\t[S2]\t[E2]\t[LEN 1]\t[LEN 2]\t[% IDY]\t[LEN R]\t[LEN Q]\t[COV R]\t[COV Q]\t[TAGS]")
@@ -270,8 +272,15 @@
        (filter not-different?)))
 
 (defn write-pair-categories
-  [fname pair-categories]
-  (with-open [outf (io/writer fname)]
+  "Will create `out-dir` if it doesn't exist.  Uses in-file to set basename of
+  outfile."
+  [in-file out-dir pair-categories]
+  (if-not (fs/exists? out-dir)
+    (fs/mkdirs out-dir))
+  (with-open [outf (io/writer (str out-dir
+                                   File/separator
+                                   (str (fs/name in-file)
+                                        ".pair_categories.txt")))]
     (doseq [[category pairs] (group-by get-category pair-categories)]
       (doseq [pair pairs]
         (.write outf (s/join "\t" (flatten [(symbol category) (first pair)])))
@@ -279,11 +288,10 @@
 
 (defn parse-coords
   "Parses the coords file.  Call this from the -main function."
-  [{:keys [min-pident min-cov coords-fname out-fname]}]
-  (println min-pident min-cov coords-fname out-fname)
-  (with-open [rdr (io/reader coords-fname)]
+  [{:keys [min-pident min-cov in-file out-dir]}]
+  (with-open [rdr (io/reader in-file)]
     (->> rdr
          line-seq
          (get-ref-query-pairs min-pident)
          (ref-query-pair-categories min-pident min-cov)
-         (write-pair-categories out-fname))))
+         (write-pair-categories in-file out-dir))))

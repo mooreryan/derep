@@ -6,10 +6,13 @@
             [seesaw.bind :as b]
             [seesaw.core :refer :all]
             [seesaw.chooser :refer [choose-file]]
-            [seesaw.mig :refer [mig-panel]])
+            [seesaw.mig :refer [mig-panel]]
+            [mooreryan.derep.pipeline :as pipeline])
   (:import (javax.swing JOptionPane)))
 
-;; TODO when exiting the GUI, exit the app.
+(declare set-current-file!)
+(declare set-current-outfile!)
+(declare my-app)
 
 (def app-config {:width 800 :height 300})
 
@@ -17,11 +20,28 @@
 (def min-cov (atom 80))
 
 (def current-file (atom nil))
+
+;; As of now, current-outfile will actually be a directory.
 (def current-outfile (atom nil))
 
 (def work-future (atom nil))
 
 (def work-errors (atom nil))
+
+(defn set-current-file!
+  [_]
+  (let [file (choose-file my-app :type :open)]
+    (when file
+      (reset! current-file file))))
+
+(defn set-current-outfile!
+  [_]
+  (let [file (choose-file my-app
+                          :type :save
+                          :selection-mode :dirs-only)]
+    (when file
+      (reset! current-outfile file))))
+
 
 (defn get-name
   [file]
@@ -36,11 +56,9 @@
 (defn app [content]
   (frame :title "derep"
          :size [(:width app-config) :by (:height app-config)]
-         :content content))
+         :content content
+         :on-close :exit))
 
-(declare set-current-file!)
-(declare set-current-outfile!)
-(declare my-app)
 
 ;; TODO make scrollable
 (defn show-error-msg
@@ -70,13 +88,13 @@
   (reset! work-errors nil)
   (let [args {:min-pident (double @min-pident)
               :min-cov (double @min-cov)
-              :coords-fname @current-file
-              :out-fname @current-outfile}]
+              :in-file @current-file
+              :out-dir @current-outfile}]
     (try
-      (coords/parse-coords args)
+      (pipeline/run-derep-pipeline args)
       (show-info-msg (str "All done!"
                           (if @current-outfile
-                            (str "\n\nOutfile:\n"
+                            (str "\n\nOutput directory:\n"
                                  (get-absolute-path @current-outfile)))))
       (catch Exception e
         (let [msg (str "ERROR: "
@@ -116,7 +134,7 @@
                  (label :id :out-fname-label
                         :text (if @current-outfile
                                 (.getName @current-outfile)
-                                "Pick an outfile!"))
+                                "Pick an output directory!"))
                  ;; Sliders
                  (slider :id :min-pident-slider
                          :value @min-pident
@@ -134,11 +152,11 @@
                  (button :id :open-file-button
                          :action (action :handler set-current-file!
                                          :name "Select infile"
-                                         :tip "Select an input coords file"))
+                                         :tip "Select an input file"))
                  (button :id :save-file-button
                          :action (action :handler set-current-outfile!
-                                         :name "Select outfile"
-                                         :tip "Select and output file"))]
+                                         :name "Select out directory"
+                                         :tip "Select an output directory"))]
     ;; Set up bindings
     (b/bind min-pident-slider min-pident)
     (b/bind min-cov-slider min-cov)
@@ -165,19 +183,5 @@
 
 (def my-app (app my-app-border-panel))
 
-(defn set-current-file!
-  [_]
-  (let [file (choose-file my-app :type :open)]
-    (when file
-      (reset! current-file file))))
-
-(defn set-current-outfile!
-  [_]
-  (let [file (choose-file my-app :type :save)]
-    (when file
-      (reset! current-outfile file))))
-
 (defn run-derep-gui! []
   (-> my-app pack! show!))
-
-(run-derep-gui!)
