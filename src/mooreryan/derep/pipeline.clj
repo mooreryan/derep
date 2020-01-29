@@ -1,7 +1,7 @@
 (ns mooreryan.derep.pipeline
-  (:require [mooreryan.derep.file-checker :as check]
-            [mooreryan.derep.coords :as coords]
-            [mooreryan.derep.nucmer :as nucmer]))
+  (:require [mooreryan.derep.coords :as coords]
+            [mooreryan.derep.nucmer :as nucmer]
+            [clojure.java.io :as io]))
 
 (defn check-file-type
   "Returns :fasta if input looks like fasta, :coords if it looks like output
@@ -20,7 +20,7 @@
 
 (defn run-derep-pipeline
   [{:keys [in-file] :as opts}]
-  (let [file-type (check/check-file-type in-file)]
+  (let [file-type (check-file-type in-file)]
     (cond
       (= :fasta file-type)
       (let [coords-fname (nucmer/make-coords-file opts)]

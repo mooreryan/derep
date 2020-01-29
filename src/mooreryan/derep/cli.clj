@@ -152,7 +152,9 @@
               (:success const/exit-codes)
               (:failure const/exit-codes))
             exit-message)
-      (action options))))
+      (do
+        (action options)
+        (shutdown-agents)))))
 
 (defn validate-args
   "Validate general program arguments."

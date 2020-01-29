@@ -5,5 +5,4 @@
 (defn -main
   "I don't do a whole lot ... yet."
   [& args]
-  (cli/run-derep args)
-  (shutdown-agents))
+  (cli/run-derep args))

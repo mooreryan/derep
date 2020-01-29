@@ -24,8 +24,6 @@
 ;; As of now, current-outfile will actually be a directory.
 (def current-outfile (atom nil))
 
-(def work-future (atom nil))
-
 (def work-errors (atom nil))
 
 (defn set-current-file!
@@ -106,9 +104,10 @@
   ;; Fail or success, reset the button
   (config! widget :text "Run derep!")
   (.setEnabled widget true))
-
+()
 (def file-preview
   (text :multi-line? true :columns 35))
+
 (def start-work
   (button :action
           (action :name "Run derep!"
@@ -118,7 +117,7 @@
                                         @min-cov
                                         @current-outfile
                                         @current-file)
-                                 (reset! work-future (future (do-work widget)))
+                                 (future (do-work widget))
                                  (show-error-msg "Not ready!  Select an input file first!")))))))
 
 (def main-panel
