@@ -5,7 +5,6 @@
             [clansi :refer [style]]
             [clj-wrap-indent.core :as wrap]
             [mooreryan.derep.coords :as coords]
-            [mooreryan.derep.gui :as gui]
             [mooreryan.derep.const :as const]
             [mooreryan.derep.pipeline :as pipeline]))
 
@@ -90,12 +89,7 @@
       (style "DETAILS" :bright)
       ""
       (wrap/wrap-indent const/details 80 2)
-      ""))
-   (style "COMMANDS" :bright)
-   ""
-   (wrap/wrap-indent "cli -- Run the CLI interface" 80 2)
-   (wrap/wrap-indent "gui -- Run the GUI interface" 80 2)
-   ""))
+      ""))))
 
 (defn cli-banner
   "This is the banner specific to the CLI version of the program."
@@ -156,7 +150,7 @@
         (action options)
         (shutdown-agents)))))
 
-(defn validate-args
+#_(defn validate-args
   "Validate general program arguments."
   [args]
   (let [{:keys [options arguments summary errors]}
@@ -180,7 +174,7 @@
   GUI."
   [args]
   (let [{:keys [action options exit-message ok?]}
-        (validate-args args)]
+        (run-derep-cli args)]
     (if exit-message
       (exit (if ok?
               (:success const/exit-codes)

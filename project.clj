@@ -7,7 +7,6 @@
                  [org.clojure/tools.cli "0.4.2"]
                  [clansi "1.0.0"]
                  [clj-wrap-indent "1.0.0"]
-                 [seesaw "1.5.0"]
                  [clj-commons/fs "1.5.0"]]
   :repl-options {:init-ns mooreryan.derep.core}
   :main ^:skip-aot mooreryan.derep.core

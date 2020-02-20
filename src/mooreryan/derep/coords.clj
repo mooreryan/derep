@@ -13,8 +13,8 @@
     (Double/parseDouble s)
     (catch NumberFormatException e s)))
 
+;; This generates the alignments.
 (defn parse-data-line
-
   "'r' means reference, 'q' means query.  Start and end are 1-based coordinates
   (I think...).  alnlen is the length of the alignment on the sequence. pident
   is % identity.  len is the length of the actual sequence. cov is the %
